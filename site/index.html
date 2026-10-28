@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>indir — video ve ses indirici</title>
+  <meta name="description" content="yt-dlp ile her siteden video ve ses indir. Tamamen GitHub üzerinde çalışır.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⬇️</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <span class="logo">⬇</span>
+      <div>
+        <h1>indir</h1>
+        <p class="sub">yt-dlp + ffmpeg · YouTube, Instagram, TikTok, X, Twitch, SoundCloud ve 1800+ site</p>
+      </div>
+    </div>
+    <button class="ghost" id="settingsBtn" type="button" aria-label="Ayarlar">⚙ Ayarlar</button>
+  </header>
+
+  <main>
+    <form id="form" class="card" autocomplete="off">
+      <label class="url">
+        <span class="sr">Bağlantı</span>
+        <input id="url" type="url" required placeholder="https://www.youtube.com/watch?v=…  — bağlantıyı yapıştır">
+        <button type="button" id="pasteBtn" class="ghost small" title="Panodan yapıştır">📋</button>
+      </label>
+
+      <div class="tabs" role="tablist">
+        <button type="button" role="tab" class="tab active" data-mode="video">🎬 Video</button>
+        <button type="button" role="tab" class="tab" data-mode="audio">🎵 Ses</button>
+        <button type="button" class="tab info" id="infoBtn" title="Tüm formatları listele">🔍 Formatları getir</button>
+      </div>
+
+      <!-- VIDEO -->
+      <section class="pane" data-pane="video">
+        <div class="field">
+          <span class="lbl">Kalite</span>
+          <div class="chips" data-name="quality">
+            <button type="button" data-v="best" class="on">En iyi</button>
+            <button type="button" data-v="4320">8K</button>
+            <button type="button" data-v="2160">4K</button>
+            <button type="button" data-v="1440">1440p</button>
+            <button type="button" data-v="1080">1080p</button>
+            <button type="button" data-v="720">720p</button>
+            <button type="button" data-v="480">480p</button>
+            <button type="button" data-v="360">360p</button>
+            <button type="button" data-v="240">240p</button>
+            <button type="button" data-v="144">144p</button>
+          </div>
+        </div>
+        <div class="grid3">
+          <label class="field">
+            <span class="lbl">Kapsayıcı</span>
+            <select id="container">
+              <option value="mp4">MP4</option>
+              <option value="mkv">MKV</option>
+              <option value="webm">WebM</option>
+              <option value="mov">MOV</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="lbl">Video codec</span>
+            <select id="vcodec">
+              <option value="any">Otomatik (en iyi)</option>
+              <option value="compat">Uyumlu (H.264 + AAC)</option>
+              <option value="h264">H.264 / AVC</option>
+              <option value="h265">H.265 / HEVC</option>
+              <option value="vp9">VP9</option>
+              <option value="av1">AV1</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="lbl">FPS</span>
+            <select id="fps">
+              <option value="any">En yüksek</option>
+              <option value="60">≤ 60</option>
+              <option value="30">≤ 30</option>
+            </select>
+          </label>
+        </div>
+        <p class="hint" id="codecHint">YouTube'da H.264 en fazla 1080p'dir; 4K/8K için Otomatik, VP9 veya AV1 seç.</p>
+        <label class="field">
+          <span class="lbl">Özel format kimliği <em>(isteğe bağlı — “Formatları getir” tablosundan seçilebilir)</em></span>
+          <input id="format_id" placeholder="ör. 137+140  ya da  bv*[height<=1080]+ba">
+        </label>
+        <div class="checks">
+          <label><input type="checkbox" id="subs"> Altyazı</label>
+          <label class="dep" data-dep="subs"><input type="checkbox" id="auto_subs"> Otomatik altyazı da</label>
+          <label class="dep" data-dep="subs"><input type="checkbox" id="embed_subs" checked> Videoya göm</label>
+          <label class="dep" data-dep="subs">Diller <input id="sub_langs" value="tr.*,en.*" size="10"></label>
+        </div>
+      </section>
+
+      <!-- AUDIO -->
+      <section class="pane" data-pane="audio" hidden>
+        <div class="field">
+          <span class="lbl">Ses formatı</span>
+          <div class="chips" data-name="audio_format">
+            <button type="button" data-v="mp3" class="on">MP3</button>
+            <button type="button" data-v="m4a">M4A (AAC)</button>
+            <button type="button" data-v="aac">AAC</button>
+            <button type="button" data-v="opus">Opus</button>
+            <button type="button" data-v="vorbis">OGG Vorbis</button>
+            <button type="button" data-v="flac" class="ll">FLAC</button>
+            <button type="button" data-v="wav" class="ll">WAV</button>
+            <button type="button" data-v="alac" class="ll">ALAC</button>
+            <button type="button" data-v="best">Orijinal (dönüştürme yok)</button>
+          </div>
+        </div>
+        <div class="grid4">
+          <label class="field" id="aqField">
+            <span class="lbl">Bit hızı</span>
+            <select id="audio_quality">
+              <option value="0">VBR en iyi (V0)</option>
+              <option value="2">VBR yüksek (V2)</option>
+              <option value="5">VBR orta (V5)</option>
+              <option value="7">VBR düşük (V7)</option>
+              <option value="320K">320 kbps</option>
+              <option value="256K">256 kbps</option>
+              <option value="192K">192 kbps</option>
+              <option value="160K">160 kbps</option>
+              <option value="128K">128 kbps</option>
+              <option value="96K">96 kbps</option>
+              <option value="64K">64 kbps</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="lbl">Örnekleme hızı</span>
+            <select id="sample_rate">
+              <option value="orig">Orijinal</option>
+              <option value="22050">22.05 kHz</option>
+              <option value="44100">44.1 kHz</option>
+              <option value="48000">48 kHz</option>
+              <option value="88200">88.2 kHz</option>
+              <option value="96000">96 kHz</option>
+              <option value="192000">192 kHz</option>
+            </select>
+          </label>
+          <label class="field" id="bdField">
+            <span class="lbl">Bit derinliği</span>
+            <select id="bit_depth">
+              <option value="orig">Varsayılan</option>
+              <option value="16">16-bit</option>
+              <option value="24">24-bit</option>
+              <option value="32">32-bit</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="lbl">Kanal</span>
+            <select id="channels">
+              <option value="orig">Orijinal</option>
+              <option value="2">Stereo</option>
+              <option value="1">Mono</option>
+            </select>
+          </label>
+        </div>
+        <p class="hint">Not: Kayıpsız formatlar (FLAC/WAV/ALAC) kaynağın kalitesini artırmaz; kaynak ne ise o korunur.</p>
+      </section>
+
+      <details class="adv">
+        <summary>Gelişmiş seçenekler</summary>
+        <div class="grid3">
+          <label class="field"><span class="lbl">Başlangıç</span><input id="start" placeholder="0:30"></label>
+          <label class="field"><span class="lbl">Bitiş</span><input id="end" placeholder="2:15"></label>
+          <label class="field chk"><input type="checkbox" id="precise_cut"> Hassas kesim (yeniden kodlar)</label>
+        </div>
+        <div class="checks">
+          <label><input type="checkbox" id="metadata" checked> Meta veri göm</label>
+          <label><input type="checkbox" id="thumbnail" checked> Kapak resmi göm</label>
+          <label><input type="checkbox" id="chapters" checked> Bölümleri göm</label>
+          <label><input type="checkbox" id="playlist"> Oynatma listesinin tamamı</label>
+          <label class="dep" data-dep="playlist">Öğeler <input id="playlist_items" value="1:25" size="8"></label>
+        </div>
+        <div class="field">
+          <span class="lbl">SponsorBlock ile çıkar <em>(YouTube)</em></span>
+          <div class="checks" id="sponsor">
+            <label><input type="checkbox" value="sponsor"> Sponsor</label>
+            <label><input type="checkbox" value="selfpromo"> Kendi reklamı</label>
+            <label><input type="checkbox" value="interaction"> Abone ol hatırlatması</label>
+            <label><input type="checkbox" value="intro"> Giriş</label>
+            <label><input type="checkbox" value="outro"> Kapanış</label>
+            <label><input type="checkbox" value="preview"> Önizleme</label>
+            <label><input type="checkbox" value="filler"> Dolgu</label>
+            <label><input type="checkbox" value="music_offtopic"> Müzik dışı kısım</label>
+          </div>
+        </div>
+      </details>
+
+      <button class="primary" id="go" type="submit">⬇ İndir</button>
+      <p class="hint center" id="modeHint"></p>
+    </form>
+
+    <section id="formatsBox" class="card" hidden>
+      <div class="fhead">
+        <img id="fThumb" alt="">
+        <div>
+          <h2 id="fTitle"></h2>
+          <p class="sub" id="fMeta"></p>
+        </div>
+        <button class="ghost small" type="button" id="fClose">✕</button>
+      </div>
+      <div class="fbar">
+        <label><input type="radio" name="ff" value="all" checked> Hepsi</label>
+        <label><input type="radio" name="ff" value="video"> Video</label>
+        <label><input type="radio" name="ff" value="audio"> Ses</label>
+        <span class="hint">Bir satıra tıkla → o formatla indir. Sadece-video formatlarına en iyi ses otomatik eklenir.</span>
+      </div>
+      <div class="tablewrap">
+        <table id="fTable">
+          <thead><tr><th>ID</th><th>Uzantı</th><th>Çözünürlük</th><th>FPS</th><th>Video</th><th>Ses</th><th>Bit hızı</th><th>Boyut</th><th>Not</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <div class="jhead">
+        <h2>İndirmeler</h2>
+        <button class="ghost small" id="clearBtn" type="button">Geçmişi temizle</button>
+      </div>
+      <div id="jobs"><p class="empty">Henüz indirme yok.</p></div>
+    </section>
+
+    <details class="card how">
+      <summary>Nasıl çalışıyor?</summary>
+      <ol>
+        <li>İndir'e bastığında site, bu depoda başlığı <code>[indir]</code> olan bir <b>issue</b> açar (ayarlara token girdiysen otomatik; yoksa GitHub sekmesinde <b>Submit</b>'e basman yeter).</li>
+        <li>GitHub Actions bu issue'yu görür, sunucuda <b>yt-dlp + ffmpeg</b> ile istediğin formatta indirir/dönüştürür.</li>
+        <li>Dosya depo içinde bir <b>Release</b>'e yüklenir, issue'ya bağlantı yazılır ve bu sayfada indirme düğmesi belirir.</li>
+        <li>Eski dosyalar her gün otomatik silinir. 2 GB'tan büyük dosyalar parçalara bölünür.</li>
+      </ol>
+    </details>
+  </main>
+
+  <dialog id="settings">
+    <form method="dialog" class="settings">
+      <h2>Ayarlar</h2>
+      <label class="field"><span class="lbl">Depo (sahip/ad)</span><input id="sRepo" placeholder="kullanici/indir"></label>
+      <label class="field">
+        <span class="lbl">GitHub token <em>(isteğe bağlı)</em></span>
+        <input id="sToken" type="password" placeholder="github_pat_…">
+      </label>
+      <p class="hint">Token girersen issue'lar otomatik açılır ve API sınırı 60'tan 5000/saate çıkar.
+        <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Fine-grained token oluştur</a>:
+        sadece bu depo, <b>Issues: Read and write</b> izni yeterli. Token yalnızca bu tarayıcıda saklanır.</p>
+      <div class="row">
+        <button value="cancel" class="ghost">Vazgeç</button>
+        <button value="save" class="primary" id="sSave">Kaydet</button>
+      </div>
+    </form>
+  </dialog>
+
+  <footer>
+    <span id="repoLink"></span> · yt-dlp ile çalışır · yalnızca indirme hakkına sahip olduğun içerikler için kullan.
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

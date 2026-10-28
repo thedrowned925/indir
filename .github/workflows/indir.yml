@@ -1,0 +1,56 @@
+name: indir
+
+# Site, başlığı "[indir]" ile başlayan bir issue açar; bu iş akışı onu işler.
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write   # release oluşturmak/yüklemek için
+  issues: write     # yorum yazıp kapatmak için
+
+concurrency:
+  group: indir-${{ github.event.issue.number }}
+
+jobs:
+  indir:
+    if: startsWith(github.event.issue.title, '[indir]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # yt-dlp'nin YouTube imza çözümü için JavaScript çalışma zamanı
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: ffmpeg ve yt-dlp kur
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg atomicparsley >/dev/null
+          python -m pip install -q -U --pre "yt-dlp[default]"
+          python -m yt_dlp --version
+          ffmpeg -hide_banner -version | head -1
+
+      - name: Çerezleri yaz (isteğe bağlı)
+        env:
+          YTDLP_COOKIES: ${{ secrets.YTDLP_COOKIES }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/indir"
+          if [ -n "$YTDLP_COOKIES" ]; then
+            printf '%s\n' "$YTDLP_COOKIES" > "$RUNNER_TEMP/indir/cookies.txt"
+            echo "Çerezler yüklendi."
+          fi
+
+      - name: İndir ve yükle
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INDIR_ALLOWED: ${{ vars.INDIR_ALLOWED }}
+        run: python .github/scripts/indir.py

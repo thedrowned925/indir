@@ -1,0 +1,34 @@
+name: temizlik
+
+# Eski indirme sürümlerini (release) siler; depo şişmesin.
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "Kaç günden eski sürümler silinsin"
+        default: "3"
+
+permissions:
+  contents: write
+
+jobs:
+  temizle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Eski indir-* sürümlerini sil
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          DAYS: ${{ inputs.days || vars.INDIR_KEEP_DAYS || '3' }}
+        run: |
+          cutoff=$(date -u -d "$DAYS days ago" +%s)
+          gh release list --repo "$REPO" --limit 1000 --json tagName,createdAt \
+            --jq '.[] | select(.tagName | startswith("indir-")) | "\(.tagName) \(.createdAt)"' |
+          while read -r tag created; do
+            if [ "$(date -u -d "$created" +%s)" -lt "$cutoff" ]; then
+              echo "Siliniyor: $tag ($created)"
+              gh release delete "$tag" --repo "$REPO" --yes --cleanup-tag || true
+            fi
+          done
