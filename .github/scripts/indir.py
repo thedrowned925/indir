@@ -128,7 +128,7 @@ def build_args(req):
     args = [
         "--newline", "--no-mtime", "--restrict-filenames", "--no-overwrites",
         "--paths", str(OUT),
-        "-o", "%(title).90B [%(id)s].%(ext)s",
+        "-o", "%(title).90B-%(id)s.%(ext)s",
         "--retries", "10", "--fragment-retries", "10",
         "--concurrent-fragments", "4",
     ]
@@ -402,6 +402,10 @@ def main():
 
         final = []
         for f in files:
+            # gh, adı glob deseni gibi yorumlar; özel karakterleri temizle.
+            safe = f.with_name(re.sub(r"[\[\]*?#,{}]", "", f.name) or "dosya")
+            if safe != f:
+                f = f.rename(safe)
             final += split_big(f)
         if not final:
             raise RuntimeError("Hiç dosya üretilmedi.\n" + "\n".join(tail))

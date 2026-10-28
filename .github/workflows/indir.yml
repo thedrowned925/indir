@@ -33,8 +33,11 @@ jobs:
 
       - name: ffmpeg ve yt-dlp kur
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg atomicparsley >/dev/null
+          # apt yerine yt-dlp'nin hazır ffmpeg derlemesi (çok daha hızlı)
+          curl -sSL https://github.com/yt-dlp/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz \
+            | tar -xJ -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/ffmpeg-master-latest-linux64-gpl/bin" >> "$GITHUB_PATH"
+          export PATH="$RUNNER_TEMP/ffmpeg-master-latest-linux64-gpl/bin:$PATH"
           python -m pip install -q -U --pre "yt-dlp[default]"
           python -m yt_dlp --version
           ffmpeg -hide_banner -version | head -1
