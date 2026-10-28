@@ -213,7 +213,7 @@ function issueBody(job) {
   return [
     `**${describe(job.req)}** — ${job.req.url}`,
     "",
-    "Bu issue [indir sitesi](" + location.href.split("#")[0] + ") tarafından oluşturuldu. Değiştirmeden **Submit new issue**'ya bas.",
+    "Bu issue [indir sitesi](" + location.href.split("#")[0] + ") tarafından oluşturuldu. Değiştirmeden yeşil **Create** düğmesine bas.",
     "",
     "```json",
     JSON.stringify(job.req, null, 2),
@@ -270,7 +270,7 @@ function newIssueUrl(job) {
 function openIssueTab(job) {
   const w = window.open(newIssueUrl(job), "_blank", "noopener");
   if (!w) toast("Açılır pencere engellendi — karttaki “GitHub'da aç” bağlantısını kullan.", 6000);
-  else toast("GitHub sekmesinde “Submit new issue”a bas, sonra buraya dön.", 6000);
+  else toast("GitHub sekmesinde yeşil “Create” düğmesine bas, sonra buraya dön.", 6000);
 }
 
 function parseComment(body) {
@@ -289,7 +289,7 @@ async function findIssues() {
   for (const j of waiting) {
     const hit = list.find((i) => !i.pull_request && i.title.includes(`[indir] ${j.id}`));
     if (hit) { j.number = hit.number; j.status = "queued"; }
-    else if (Date.now() - j.created > 30 * 60e3) { j.status = "error"; j.error = "Issue bulunamadı. GitHub'da “Submit”e bastın mı?"; }
+    else if (Date.now() - j.created > 30 * 60e3) { j.status = "error"; j.error = "Issue bulunamadı. GitHub'da “Create”e bastın mı?"; }
   }
 }
 

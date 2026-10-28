@@ -26,7 +26,7 @@ Ortak: kırpma (başlangıç–bitiş), oynatma listesi, SponsorBlock ile sponso
 3. Siteyi aç: `https://<kullanıcı>.github.io/indir/`
 4. *(Önerilir)* Sitede **⚙ Ayarlar** → fine-grained token gir
    ([buradan oluştur](https://github.com/settings/personal-access-tokens/new): yalnızca bu depo, **Issues: Read and write**).
-   Token olmadan da çalışır; o zaman her indirmede açılan GitHub sekmesinde *Submit new issue*'ya basman gerekir.
+   Token olmadan da çalışır; o zaman her indirmede açılan GitHub sekmesinde yeşil **Create** düğmesine basman gerekir.
 
 > İş akışları yalnızca **varsayılan daldaki** dosyalardan çalışır. Bu dosyalar başka bir daldaysa önce varsayılan dala birleştir.
 
